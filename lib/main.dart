@@ -3,6 +3,8 @@ import 'package:flutter_todo_graphql/core/services/graphql_services.dart';
 import 'package:flutter_todo_graphql/features/todo/pages/todo_page.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
+final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() {
   runApp(const MyApp());
 }
@@ -16,6 +18,7 @@ class MyApp extends StatelessWidget {
     return GraphQLProvider(
       client: graphQlServices.client,
       child:  MaterialApp(
+        scaffoldMessengerKey: scaffoldMessengerKey,
           title: 'Flutter Demo',
           debugShowCheckedModeBanner: false,
           theme:ThemeData.dark(

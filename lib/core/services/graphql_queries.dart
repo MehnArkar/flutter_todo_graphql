@@ -1,4 +1,15 @@
 class GraphQlQueries{
+
+  static String toggleIsCompletedMutation(result, index) {
+    return (
+        """mutation ToggleTask{
+         update_todo(where: {
+          id: {_eq: ${result.data["todo"][index]["id"]}}},
+          _set: {isCompleted: ${!result.data["todo"][index]["isCompleted"]}}) {
+             returning {isCompleted } }
+             }""");
+  }
+
   static String fetchTodoQuery() {
     return (
         """query TodoQuery{
