@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_todo_graphql/core/services/graphql_services.dart';
+import 'package:flutter_todo_graphql/features/todo/pages/todo_page.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,13 +13,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const IndexPage()
+    return GraphQLProvider(
+      client: graphQlServices.client,
+      child:  MaterialApp(
+          title: 'Flutter Demo',
+          debugShowCheckedModeBanner: false,
+          theme:ThemeData.dark(
+            useMaterial3: true
+          ),
+          home: const IndexPage()
+      )
     );
   }
 }
@@ -26,7 +32,7 @@ class IndexPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const TodoPage();
   }
 }
 
