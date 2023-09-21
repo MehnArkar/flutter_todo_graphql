@@ -39,7 +39,16 @@ class TodoPage extends StatelessWidget {
                   task: result.data!["todo"][index]["task"],
                   isCompleted: result.data!["todo"][index]["isCompleted"],
                   delete: ()async{
-                    // await GraphQLProvider.of(context).value.mutate(MutationOptions(document: gql(document)));
+                    QueryResult deleteResult = await GraphQLProvider.of(context).value.mutate(MutationOptions(document: gql(GraphQlQueries.deleteTaskMutation(result, index))));
+                    if(!deleteResult.hasException){
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('delete'))
+                      );
+                    }else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(deleteResult.exception.toString()))
+                      );
+                    }
                   },
                   toggleIsComplete: (){},
               )
