@@ -17,7 +17,7 @@ class TodoPage extends StatelessWidget {
      ),
      body: todoList(),
      floatingActionButton: FloatingActionButton(
-       onPressed:()=> showAddTodoDialog(context),
+       onPressed:()=>showAddTodoDialog(context),
        child: const Icon(Icons.add,color: Colors.white,),
      ),
    );
@@ -40,11 +40,17 @@ class TodoPage extends StatelessWidget {
                   isCompleted: result.data!["todo"][index]["isCompleted"],
                   delete: () async => await onDeleteToDo(context,result,index),
                   toggleIsComplete: ()async=> await onUpdateToDo(context, result, index)
-
               )
           );
         }
     );
+  }
+
+  onFetchToDo(BuildContext context)async{
+    QueryResult result = await GraphQLProvider.of(context).value.query(
+        QueryOptions(document: gql(GraphQlQueries.fetchTodoQuery()),)
+    );
+    print(result.data!["todo"]);
   }
 
   onAddToDo(BuildContext context,String taskName) async{

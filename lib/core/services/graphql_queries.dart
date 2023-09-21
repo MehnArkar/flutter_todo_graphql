@@ -12,7 +12,7 @@ class GraphQlQueries{
 
   static String fetchTodoQuery() {
     return (
-        """query TodoQuery{
+        """query GetToDo{
                todo {
                   id
                   isCompleted
@@ -21,14 +21,14 @@ class GraphQlQueries{
   }
 
   static String deleteTaskMutation(result, index) {
-    return ("""mutation DeleteTask{       
+    return ("""mutation DeleteToDo{       
               delete_todo(where: {id: {_eq: ${result.data["todo"][index]["id"]}}}) {
                  returning {id} }
                  }""");
   }
 
   static String addTaskQuery(task) {
-    return ("""mutation AddTask{
+    return ("""mutation AddToDo{
               insert_todo(objects: {isCompleted: false, task: "$task"}) {
                 returning {id} }
                  }""");
