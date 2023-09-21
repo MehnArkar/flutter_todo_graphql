@@ -28,44 +28,56 @@ class TodoPage extends StatelessWidget {
         options: QueryOptions(document: gql(GraphQlQueries.fetchTodoQuery()),pollInterval: const Duration(seconds: 10)),
         builder: (QueryResult result, { VoidCallback? refetch, FetchMore? fetchMore }){
           if (result.hasException) {
-            return Text('Exception : ${result.exception}');
+            return Center(child: Text('Exception : ${result.exception}'));
           }
           if (result.isLoading) {
-            return const Text('Loading');
+            return const Center(child: CircularProgressIndicator());
           }
           return ListView.builder(
               itemCount: result.data!["todo"].length,
               itemBuilder: (context,index)=>ToDoCard(
                   task: result.data!["todo"][index]["task"],
                   isCompleted: result.data!["todo"][index]["isCompleted"],
-                  delete: ()async{
-                    await onDeleteToDo(context,result,index);
-                  },
-                  toggleIsComplete: ()async{
-                    await onUpdateToDo(context, result, index);
-                  },
+                  delete: () async => await onDeleteToDo(context,result,index),
+                  toggleIsComplete: ()async=> await onUpdateToDo(context, result, index)
+
               )
           );
         }
     );
   }
 
+  onAddToDo(BuildContext context,String taskName) async{
+    await GraphQLProvider.of(context).value.mutate(
+        MutationOptions(
+            document: gql(GraphQlQueries.addTaskQuery(taskName)),
+            onCompleted: (_){
+              showSnackBar('Added Todo');
+            }
+        )
+    );
+  }
+
   onDeleteToDo(BuildContext context,result,index)async{
-    QueryResult deleteResult = await GraphQLProvider.of(context).value.mutate(MutationOptions(document: gql(GraphQlQueries.deleteTaskMutation(result, index))));
-    if(!deleteResult.hasException){
-       showSnackBar('Deleted todo');
-    }else{
-      showSnackBar(deleteResult.exception.toString());
-    }
+   await GraphQLProvider.of(context).value.mutate(
+        MutationOptions(
+            document: gql(GraphQlQueries.deleteTaskMutation(result, index)),
+          onCompleted: (_){
+            showSnackBar('Deleted Todo');
+          }
+        )
+    );
   }
 
   onUpdateToDo(BuildContext context,result,index)async{
-    QueryResult toggleResult = await GraphQLProvider.of(context).value.mutate(MutationOptions(document: gql(GraphQlQueries.toggleIsCompletedMutation(result, index))));
-    if(!toggleResult.hasException){
-      showSnackBar('Updated todo');
-    }else{
-      showSnackBar(toggleResult.exception.toString());
-    }
+    await GraphQLProvider.of(context).value.mutate(
+        MutationOptions(document: gql(GraphQlQueries.toggleIsCompletedMutation(result, index)),
+            onCompleted: (toggleResult){
+                showSnackBar('Updated Todo');
+            }
+        )
+    );
+
   }
 
   showSnackBar(String message){
@@ -93,26 +105,40 @@ class TodoPage extends StatelessWidget {
                     const SizedBox(height: 25,),
                     TextField(
                       controller: txtTodoName,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Task name'
                       ),
                     ),
                     const SizedBox(height: 25,),
                     ElevatedButton(
-                        onPressed: ()async{
-                          QueryResult result = await GraphQLProvider.of(context).value.mutate(MutationOptions(document: gql(GraphQlQueries.addTaskQuery(txtTodoName.text.trim()))));
+                        onPressed: () async {
                           Navigator.of(context).pop();
-                          if(!result.hasException){
-                            scaffoldMessengerKey.currentState?.showSnackBar(
-                                SnackBar(content: Text('Added'))
-                          );
-                          }else{
-                            scaffoldMessengerKey.currentState?.showSnackBar(
-                                SnackBar(content: Text(result.exception.toString()))
-                            );
-                          }
+                          await onAddToDo(context, txtTodoName.text.trim());
                         },
-                        child: Text('ADD')),
+                        child:const Text(
+                          "Add",
+                          style: TextStyle(color: Colors.white),
+                        ))
+                    // Mutation(
+                    //   options: MutationOptions(
+                    //     document: gql(GraphQlQueries.addTaskQuery(txtTodoName.text.trim())),
+                    //     // or do something with the result.data on completion
+                    //     onCompleted: (dynamic resultData) {
+                    //       showSnackBar('Added');
+                    //     },
+                    //   ),
+                    //   builder:(runMutation,result){
+                    //     return ElevatedButton(
+                    //         onPressed: () async {
+                    //            runMutation({});
+                    //         },
+                    //         child: Text(
+                    //           "Add",
+                    //           style: TextStyle(color: Colors.white),
+                    //         ));
+                    //   }
+                    //
+                    // ),
                   ],
                 ),
               )
